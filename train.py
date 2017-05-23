@@ -1,6 +1,6 @@
 import tensorflow as tf
 import pyaudio
-import wave
+import numpy as np
 import os
 from voiceRead import ReadVoice
 
@@ -32,6 +32,9 @@ class Trainer():
                 for file in filenames:
                     data = r.read_file(file)
                     wavs.append(data)
+        targets = np.array(targets)
+        wavs = np.array(wavs)
+        return targets, wavs
 
 
 

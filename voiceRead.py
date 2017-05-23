@@ -58,7 +58,9 @@ class ReadVoice(object):
         converts stream from readstream to matrix that can be read by tensorflow
         """
         data = np.fromstring(stream, "Float32")
-        print data
+        return data
+
+
 
     def read_file(self, filename):
         p = PyAudio()

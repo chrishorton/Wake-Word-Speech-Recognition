@@ -1,9 +1,10 @@
 import pyaudio
 from pyaudio import PyAudio
+import wave
+import numpy as np
 
 class ReadVoice(object):
-    audio = PyAudio()
-    def __init__(self, format, channels, rate ,frames_per_buffer, seconds):
+    def __init__(self, format=None, channels=None, rate=None ,frames_per_buffer=None, seconds=None, audio=PyAudio()):
         '''FORMAT = pyaudio.paInt16
         CHANNELS = 2
         RATE = 44100
@@ -34,22 +35,42 @@ class ReadVoice(object):
         else:
             self.frames_per_buffer = frames_per_buffer
 
-    @property
-    def read_stream(self):
+        self.audio = audio
+
+
+    def read_mic_stream(self):
         audio = PyAudio()
 
         stream = audio.open(format=self.format, channels=self.channels,
                             rate=self.rate, input=True,
-                            frames_per_buffer=self.chunk)
-        frames = []
+                            frames_per_buffer=self.frames_per_buffer)
+        print "Recording"
 
         for i in range(0, int(self.rate / self.frames_per_buffer * self.seconds)):
             data = stream.read(self.frames_per_buffer)
-            frames.append(data)
-        return stream
 
-    def convert_stream(self):
+        return data
+
+
+
+    def convert_stream(self, stream):
         """
         converts stream from readstream to matrix that can be read by tensorflow
         """
-        print "Something"
+        data = np.fromstring(stream, "Float32")
+        print data
+
+    def read_file(self, filename):
+        p = PyAudio()
+
+        wf = wave.open(filename, 'rb')
+        stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
+                        channels=wf.getnchannels(),
+                        rate=wf.getframerate(),
+                        output=True)
+
+        while data != '':
+            stream.write(data)
+            data = wf.readframes(self.frames_per_buffer)
+
+        return data

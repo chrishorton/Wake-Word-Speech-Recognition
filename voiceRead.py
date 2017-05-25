@@ -4,13 +4,16 @@ import wave
 import numpy as np
 
 class ReadVoice(object):
-    def __init__(self, format=None, channels=None, rate=None ,frames_per_buffer=None, seconds=None, audio=PyAudio()):
+    def __init__(self, filename=None, format=None, channels=None, rate=None ,frames_per_buffer=None, seconds=None, audio=PyAudio()):
         '''FORMAT = pyaudio.paInt16
         CHANNELS = 2
         RATE = 44100
         CHUNK = 1024
         RECORD_SECONDS = 5
         WAVE_OUTPUT_FILENAME = "file.wav"'''
+        if filename is None:
+            self.filename = filename
+
         if seconds is None:
             self.seconds = 5
         else:
@@ -61,18 +64,17 @@ class ReadVoice(object):
         return data
 
 
-
     def read_file(self, filename):
         p = PyAudio()
-
         wf = wave.open(filename, 'rb')
-        stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
+        print "stream"
+        p.open(format=p.get_format_from_width(wf.getsampwidth()),
                         channels=wf.getnchannels(),
                         rate=wf.getframerate(),
+                        input=True,
                         output=True)
-
-        while data != '':
-            stream.write(data)
-            data = wf.readframes(self.frames_per_buffer)
-
+        data = wf.readframes(self.frames_per_buffer)
+        data = self.convert_stream(data)
+        data = data.ravel()
         return data
+

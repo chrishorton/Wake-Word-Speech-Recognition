@@ -3,4 +3,4 @@ from voiceRead import ReadVoice
 
 voice = ReadVoice()
 
-voice.convert_stream(voice.read_mic_stream())
+voice.convert_stream(voice.read_file())

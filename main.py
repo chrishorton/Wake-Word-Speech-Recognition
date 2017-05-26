@@ -1,6 +1,10 @@
 import tensorflow as tf
+from train import Trainer
 from voiceRead import ReadVoice
 
 voice = ReadVoice()
+trainer = Trainer()
 
-voice.convert_stream(voice.read_file())
+
+targets, wavs = trainer.getData()
+trainer.train(targets, wavs)

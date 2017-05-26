@@ -34,9 +34,9 @@ class Trainer():
         return targets, wavs
 
 
-    def train(self):
+    def train(self, targets, wavs):
         x = tf.placeholder("float", [1024,])
-        y = tf.placeholder("float", [3 ])
+        y = tf.placeholder("float", [3])
         W = tf.Variable(tf.zeros([1024,3]))
         b = tf.Variable(tf.zeros([3]))
 
@@ -53,9 +53,11 @@ class Trainer():
 
         with tf.Session() as sess:
             sess.run(init)
-            for iter in range(self.training_iter):
-                average_cost = 0.
+            average_cost = 0.
 
+            for iter in range(self.training_iter):
+                sess.run(optimizer, feed_dict={wavs, targets})
+                average_cost += sess.run(cost_function, feed_dict={x: wavs, y: targets})
 
 
 

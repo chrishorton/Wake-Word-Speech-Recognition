@@ -4,7 +4,7 @@ import wave
 import numpy as np
 
 class ReadVoice(object):
-    def __init__(self, filename=None, format=None, channels=None, rate=None ,frames_per_buffer=None, seconds=None, audio=PyAudio()):
+    def __init__(self, filename=None, format=None, channels=None, rate=None, frames_per_buffer=None, seconds=None, audio=PyAudio()):
         '''FORMAT = pyaudio.paInt16
         CHANNELS = 2
         RATE = 44100

@@ -89,7 +89,7 @@ class Trainer():
 
         wavs = wavs.reshape([1, 1024, 8])
         print wavs.shape
-
+        targets.reshape([2,1])
         print targets.shape, wavs.shape
         return targets, wavs
 
@@ -129,7 +129,7 @@ class Trainer():
     def tflearn_train(self, targets, wavs):
         net = tflearn.input_data([None, 1024, 8])
         net = tflearn.lstm(net, 128, dropout=0.8)
-        net = tflearn.fully_connected(net, 3, activation="softmax")
+        net = tflearn.fully_connected(net, 1, activation="softmax")
         net = tflearn.regression(net)
 
         col = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)

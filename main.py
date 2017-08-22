@@ -16,5 +16,10 @@ if __name__ == "__main__":
     # X = X.resahpe
     print "Getting data"
     X, Y = trainer.getData()
+    print "Shapes: X, Y"
+    print X.shape, Y.shape
+    print "Generating noise"
+    noise = trainer.gen_gaussian_noise(X.shape)
+    print X, Y
     print "Got data"
     trainer.tflearn_train(X, Y)

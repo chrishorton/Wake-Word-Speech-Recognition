@@ -45,12 +45,12 @@ class Trainer():
             data = np.fromstring(data0, dtype='uint8')
             data = (data + 128) / 255.  # 0-1 for Better convergence
             # chunks.append(data)
+            # better way to do this (extending it) so that it adds on to the end of the array
             chunk.extend(data)
             data0 = f.readframes(self.CHUNK)
         # finally trim:
         chunk = chunk[0:self.CHUNK * 2]  # should be enough for now -> cut
         chunk.extend(np.zeros(self.CHUNK * 2 - len(chunk)))  # fill with padding 0's
-        # print("%s loaded"%name)
         return chunk
 
     def gen_gaussian_noise(self, img_shape):
@@ -64,34 +64,53 @@ class Trainer():
         '''loads all wav files within a directory and calls voiceRead functions to normalize them'''
         wavs = []
         img_shape = [1024,8]
-        filenames_list = []
-        targets = []
+        file_names_list = []
         dir = self.dataDir
-        r = ReadVoice()
+        print "Generating noise"
         noise = self.gen_gaussian_noise(img_shape)
         # walks the training dir to gather all word names
-        for (dirpath, dirnames, filenames) in os.walk(dir):
-            filenames_list.extend(filenames)
-        index = 0
-        for file in filenames:
-            targets.append(index)
-            index += 1
-            print file
-            data = self.load_wav_file(self.dataDir + "/" + file)
-            # data = r.read_file(self.dataDir+"/"+file)
-            wavs.append(data)
-
+        for (directory_path, directory_names, file_names) in os.walk(dir):
+            file_names_list.extend(file_names)
+        for file in file_names_list:
+            if file != ".DS_Store":
+                print file
+                data = self.load_wav_file(self.dataDir + "/" + file)
+                wavs.extend([data])
         wavs = np.array(wavs)
+        print wavs.shape
+        print noise.shape
         np.append(wavs, noise)
         # hack for the labels for now
         targets = np.array([[0], [1]])
-        print wavs.shape
-
+        print "Targets", targets
         wavs = wavs.reshape([1, 1024, 8])
-        print wavs.shape
         targets.reshape([2,1])
+        print "Targets, wavs shapes"
         print targets.shape, wavs.shape
         return targets, wavs
+
+    def tflearn_train(self, targets, wavs):
+        #set up input data and place
+        net = tflearn.input_data([None, 1024, 8])
+        net = tflearn.lstm(net, 128, dropout=0.8)
+        net = tflearn.fully_connected(net, 1, activation="softmax")
+        net = tflearn.regression(net)
+
+        # what does this do lol - research documentation
+        col = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+
+        for x in col:
+            tf.add_to_collection(tf.GraphKeys.VARIABLES, x)
+        # builds our model with net variable we assigned all layers to
+        model = tflearn.DNN(net, tensorboard_verbose=0)
+
+        while 1:  # training_iters
+            model.fit(wavs, targets, n_epoch=10, show_metric=True, batch_size=10)
+            # _y = model.predict(wavs)
+
+        model.save("tflearn.lstm.model")
+        print (y)
+
 
 
 
@@ -124,27 +143,3 @@ class Trainer():
         # Calculate accuracy
         accuracy = tf.reduce_mean(tf.cast(predictions, "float"))
         print accuracy
-
-
-    def tflearn_train(self, targets, wavs):
-        net = tflearn.input_data([None, 1024, 8])
-        net = tflearn.lstm(net, 128, dropout=0.8)
-        net = tflearn.fully_connected(net, 1, activation="softmax")
-        net = tflearn.regression(net)
-
-        col = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
-        for x in col:
-            tf.add_to_collection(tf.GraphKeys.VARIABLES, x)
-
-        model = tflearn.DNN(net, tensorboard_verbose=0)
-
-        while 1:  # training_iters
-            model.fit(wavs, targets, n_epoch=10, show_metric=True, batch_size=10)
-            # _y = model.predict(wavs)
-
-        model.save("tflearn.lstm.model")
-        print (y)
-
-
-
-
